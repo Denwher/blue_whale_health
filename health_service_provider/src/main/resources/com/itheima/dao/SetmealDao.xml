@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.itheima.dao.SetmealDao">
+    <sql id="setmealColumns">
+        id,name,code,helpCode,sex,age,price,remark,attention,img
+    </sql>
+
+    <!--添加套餐项-->
+    <insert id="add" parameterType="setmeal" useGeneratedKeys="true" keyProperty="id">
+        insert into t_setmeal (<include refid="setmealColumns"></include>)
+        values (null,#{name},#{code},#{helpCode},#{sex},#{age},#{price},#{remark},#{attention},#{img})
+    </insert>
+
+    <!--建立套餐项和检查组之间的多对多关系-->
+    <insert id="setSetmealAndCheckGroup" parameterType="map">
+        insert into t_setmeal_checkgroup (setmeal_id, checkgroup_id)
+        values (#{setmealId},#{checkGroupId})
+    </insert>
+
+    <!--根据条件获取分页数据-->
+    <select id="queryByCondition" parameterType="string" resultType="setmeal">
+        select <include refid="setmealColumns"></include> from t_setmeal
+        <where>
+            <if test="queryString != null and queryString.length > 0">
+                name like "%"#{queryString}"%" or code = #{queryString} or helpCode = #{queryString}
+            </if>
+        </where>
+    </select>
+
+    <!--获取全部套餐数据-->
+    <select id="getAll" resultType="setmeal">
+        select <include refid="setmealColumns"></include> from t_setmeal
+    </select>
+
+    <resultMap id="baseResultMap" type="setmeal">
+        <id column="id" property="id"/>
+        <result column="name" property="name"/>
+        <result column="code" property="code"/>
+        <result column="helpCode" property="helpCode"/>
+        <result column="sex" property="sex"/>
+        <result column="age" property="age"/>
+        <result column="price" property="price"/>
+        <result column="remark" property="remark"/>
+        <result column="attention" property="attention"/>
+        <result column="img" property="img"/>
+    </resultMap>
+    <resultMap id="queryByIdResultMap" type="setmeal" extends="baseResultMap">
+        <collection property="checkGroups"
+                    javaType="ArrayList"
+                    ofType="checkGroup"
+                    column="id"
+                    select="com.itheima.dao.CheckGroupDao.queryCheckGroupById"
+        />
+    </resultMap>
+    
+    <!--根据id查找套餐数据-->
+    <select id="queryById" resultMap="queryByIdResultMap">
+        select <include refid="setmealColumns"></include> from t_setmeal where id = #{id}
+    </select>
+
+    <!--查询全部套餐-->
+    <select id="findAll" resultType="setmeal">
+        select <include refid="setmealColumns"></include> from t_setmeal
+    </select>
+
+    <!--查询套餐预约数量-->
+    <select id="querySetmealCount" resultType="map">
+        select s.`name`,COUNT(o.id) `value` from t_setmeal s, t_order o where s.id = o.setmeal_id GROUP BY s.`name`
+    </select>
+</mapper>

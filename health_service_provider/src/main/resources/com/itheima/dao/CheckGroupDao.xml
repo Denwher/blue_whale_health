@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.itheima.dao.CheckGroupDao">
+
+    <sql id="checkGroupColumns">
+        id,code,name,helpCode,sex,remark,attention
+    </sql>
+
+    <!--插入检查组的数据-->
+    <insert id="add" parameterType="checkGroup">
+        <selectKey keyProperty="id" order="AFTER" resultType="int">
+            select LAST_INSERT_ID()
+        </selectKey>
+        insert into t_checkgroup (<include refid="checkGroupColumns"></include>)
+        values (null,#{code},#{name},#{helpCode},#{sex},#{remark},#{attention})
+    </insert>
+
+    <!--建立group和item之间的多对多关系-->
+    <insert id="setCheckGroupAndCheckItem" parameterType="map">
+        insert into t_checkgroup_checkitem (checkgroup_id,checkitem_id)
+        values (#{checkgroup_id},#{checkitem_id})
+    </insert>
+
+    <!--根据条件获取分页数据-->
+    <select id="queryPageByCondition" parameterType="string" resultType="checkGroup">
+        select <include refid="checkGroupColumns"></include> from t_checkgroup
+        <where>
+            <if test="queryString != null and queryString.length > 0">
+                code = #{queryString} or name like "%"#{queryString}"%" or helpCode = #{queryString}
+            </if>
+        </where>
+    </select>
+
+    <!--根据id获取检查组记录-->
+    <select id="queryById" parameterType="int" resultType="checkGroup">
+        select <include refid="checkGroupColumns"></include> from t_checkgroup where id = #{checkGroupId}
+    </select>
+
+    <!--查询全部检查组记录-->
+    <select id="queryAll" resultType="checkGroup">
+        select <include refid="checkGroupColumns"></include> from t_checkgroup
+    </select>
+
+    <!--根据id获取检查组记录-->
+    <select id="queryCheckItemIdsByCheckGroupId" parameterType="int" resultType="int">
+        select checkitem_id from t_checkgroup_checkitem where checkgroup_id = #{checkGroupId}
+    </select>
+
+    <!--更新检查组信息-->
+    <update id="update" parameterType="checkGroup">
+        update t_checkgroup
+        <set>
+            <if test="code != null">
+                code = #{code},
+            </if>
+            <if test="name != null">
+                name = #{name},
+            </if>
+            <if test="helpCode != null">
+                helpCode = #{helpCode},
+            </if>
+            <if test="sex != null">
+                sex = #{sex},
+            </if>
+            <if test="remark != null">
+                remark = #{remark},
+            </if>
+            <if test="attention != null">
+                attention = #{attention},
+            </if>
+        </set>
+        where id = #{id}
+    </update>
+
+    <!--根据id删除检查组关联检查项的信息-->
+    <delete id="deleteAssociation" parameterType="int">
+        delete from t_checkgroup_checkitem where checkgroup_id = #{checkGroupId}
+    </delete>
+
+    <resultMap id="baseResultMap" type="checkGroup">
+        <id property="id" column="id"/>
+        <result column="code" property="code"/>
+        <result column="name" property="name"/>
+        <result column="helpCode" property="helpCode"/>
+        <result column="sex" property="sex"/>
+        <result column="remark" property="remark"/>
+        <result column="attention" property="attention"/>
+    </resultMap>
+    <resultMap id="queryByIdResultMap" type="checkGroup" extends="baseResultMap">
+        <collection property="checkItems"
+                    javaType="ArrayList"
+                    ofType="checkItem"
+                    column="id"
+                    select="com.itheima.dao.CheckItemDao.queryCheckItemById"
+        />
+    </resultMap>
+    <!--根据套餐id查询检查组信息-->
+    <select id="queryCheckGroupById" resultMap="queryByIdResultMap">
+        select <include refid="checkGroupColumns"></include> from t_checkgroup
+        where id in (select checkgroup_id from t_setmeal_checkgroup where setmeal_id = #{id})
+    </select>
+</mapper>

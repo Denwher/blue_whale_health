@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.itheima.dao.PermissionDao">
+
+    <sql id="permissionColumns">
+        id,name,keyword,description
+    </sql>
+
+    <!--根据roleId查询permission集合-->
+    <select id="queryPermissionsByRoleId" parameterType="int" resultType="permission">
+        select p.* from t_permission p, t_role_permission rp where p.id = rp.permission_id and rp.role_id = #{roleId}
+    </select>
+</mapper>

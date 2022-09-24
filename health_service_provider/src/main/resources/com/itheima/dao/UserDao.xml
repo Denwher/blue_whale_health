@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.itheima.dao.UserDao">
+
+    <sql id="userColumns">
+        id,birthday,gender,username,password,remark,station,telephone
+    </sql>
+
+    <resultMap id="userResultMap" type="user">
+        <id column="id" property="id"/>
+        <result column="birthday" property="birthday"/>
+        <result column="gender" property="gender"/>
+        <result column="username" property="username"/>
+        <result column="password" property="password"/>
+        <result column="remark" property="remark"/>
+        <result column="station" property="station"/>
+        <result column="telephone" property="telephone"/>
+        <collection property="roles"
+                    javaType="java.util.HashSet"
+                    ofType="role"
+                    column="id"
+                    select="com.itheima.dao.RoleDao.queryRolesByUserId"
+        />
+    </resultMap>
+
+    <!--根据用户名查询用户-->
+    <select id="queryUserByUsername" parameterType="string" resultMap="userResultMap">
+        select <include refid="userColumns"></include> from t_user where username = #{username}
+    </select>
+
+
+</mapper>
