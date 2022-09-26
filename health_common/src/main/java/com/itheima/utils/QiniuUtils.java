@@ -12,9 +12,9 @@ import com.qiniu.util.Auth;
 
 
 public class QiniuUtils {
-    public  static String accessKey = "kF0_oYg1MrGDnDdmrTDzpOcDueS9pdOnATw1BfeE";
-    public  static String secretKey = "fGRdkG4NRC10imLFIcNcxnLKemqVqtv-IjdZnkqO";
-    public  static String bucket = "itcasthealth-space-v1";
+    public  static String accessKey = "your accessKey";
+    public  static String secretKey = "your secretKey";
+    public  static String bucket = "your bucket";
 
     public static void upload2Qiniu(String filePath,String fileName){
         //构造一个带指定Zone对象的配置类
